@@ -366,7 +366,7 @@ function library.new(library, name, theme)
             local sat, val = 255, 255
             for i = 1, 10 do
                 local hue = i * 17
-                table.insert(list, Color3.fromHSV(hue / 224, sat / 255, val / 253))
+                table.insert(list, Color3.fromHSV(hue / 255, sat / 255, val / 255))
             end
         end
         rainbowColors()

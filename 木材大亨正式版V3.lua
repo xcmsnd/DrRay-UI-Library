@@ -593,97 +593,7 @@ function finditem(BItem)
   end
 end
 
-function autobuyv2(o)
 
-
-  local item=nil
-  local ltem
-
-  item=finditem(o)
-
-  if item==nil then
-    notify("小中","没有找到商品或者没有刷新，请你等待",4)
-    repeat
-      item=finditem(o)
-      wait()
-
-    until item~=nil
-
-  end
-
-  ltem=item[5]
-
-
-  game:GetService("ReplicatedStorage").PlaceStructure.ClientPlacedStructure:FireServer(nil,item[4],lp, nil, ltem, true)
-
-
-
-  game:GetService("ReplicatedStorage").NPCDialog.PlayerChatted:InvokeServer({["Character"] = item[2], ["Name"] =item[1], ["ID"] = tonumber(item[3])}, "ConfirmPurchase")
-
-
-
-  return o
-end
-
-function autobuy(o, r)
-  bai.autocsdx = game.Workspace.PlayerModels.ChildAdded:connect(function(v)
-
-    game:GetService("ReplicatedStorage").PlaceStructure.ClientPlacedStructure:FireServer(nil,bai.autobuyset,lp, nil, v, true)
-
-  end)
-  for e = 1, r do
-    if bai.autobuystop==false then
-      autobuyv2(o)
-    end
-
-  end
-  spawn(function()
-    wait(1)
-    bai.autocsdx:Disconnect();
-    bai.autocsdx=nil;
-  end)
-  return o, r
-end
-function tpitems(name)
-  local plr = bai.cswjia
-  local StealType = name
-
-  for i,v in pairs(game.Workspace.PlayerModels:GetChildren()) do
-    if v:FindFirstChild("Owner") and tostring(v.Owner.Value) == plr then
-      if StealType ~= "TreeClass" then
-        if v:FindFirstChild("Type") and tostring(v.Type.Value) == StealType then
-          if v.PrimaryPart then
-            game:GetService("ReplicatedStorage").PlaceStructure.ClientPlacedStructure:FireServer(nil,bai.itemset,lp, nil, v, true)
-          end
-        end
-       else
-
-        if v:FindFirstChild("TreeClass") then
-
-          spawn(function()
-            for i=1 ,20 do
-              game.ReplicatedStorage.Interaction.ClientRequestOwnership:FireServer(v.WoodSection)
-              game:GetService("ReplicatedStorage").Interaction.ClientIsDragging:FireServer(v.WoodSection)
-              game:GetService("RunService").Stepped:wait();
-            end
-            v.WoodSection.CFrame= bai.itemset
-          end)
-          task.wait()
-
-
-
-        end
-
-
-
-
-
-      end
-    end
-
-  end
-  notfy("小中","完成",4)
-end
 
 local function shuaxinlb(includeSelf)
     bai.dropdown = {}
@@ -2512,277 +2422,355 @@ end)
 local UITab3 = win:Tab("NPC一秒购买",'16060333448')
 
 local about = UITab3:section("一秒购买",true)
-
--- 辐射商店
-local isRunningRadiation = false
+local radiationRunning = false
+local radiationCoroutine = nil
 about:Toggle("辐射商店", "Toggle", false, function(Value)
-    isRunningRadiation = Value
-    if Value then
-        coroutine.wrap(function()
-            local store = workspace:WaitForChild("Stores"):WaitForChild("PlantomicsChoice")
-            local npc = store:WaitForChild("Plantomic")
-            local dialog = npc:WaitForChild("Dialog")
-            local remote = game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted")
-            
-            local args = {
-                { ID = 30, Character = npc, Name = "Plantomic", Dialog = dialog },
-                "ConfirmPurchase"
-            }
-            
-            while isRunningRadiation do
-                pcall(function()
-                    remote:InvokeServer(unpack(args))
-                end)
-                for i = 1, 10 do
-                    if not isRunningRadiation then break end
-                    task.wait(0.01)
-                end
+    radiationRunning = Value
+    
+    if radiationRunning then
+        -- 开启
+        radiationCoroutine = coroutine.wrap(function()
+            while radiationRunning do
+                local args = {
+                    {
+                        ID = 30,
+                        Character = workspace:WaitForChild("Stores"):WaitForChild("PlantomicsChoice"):WaitForChild("Plantomic"),
+                        Name = "Plantomic",
+                        Dialog = workspace:WaitForChild("Stores"):WaitForChild("PlantomicsChoice"):WaitForChild("Plantomic"):WaitForChild("Dialog")
+                    },
+                    "ConfirmPurchase"
+                }
+                
+                -- 调用购买
+                game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted"):InvokeServer(unpack(args))
+                
+                -- 等待0.1秒
+                wait()
             end
         end)()
+    else
+        -- 关闭
+        radiationRunning = false
+        if radiationCoroutine then
+            radiationCoroutine = nil
+        end
     end
 end)
 
--- 家具商店
-local isRunningFurniture = false
+-- 家具商店开关
+local furnitureRunning = false
+local furnitureCoroutine = nil
 about:Toggle("家具商店", "Toggle", false, function(Value)
-    isRunningFurniture = Value
-    if Value then
-        coroutine.wrap(function()
-            local store = workspace:WaitForChild("Stores"):WaitForChild("FurnitureStore")
-            local npc = store:WaitForChild("Corey")
-            local dialog = npc:WaitForChild("Dialog")
-            local remote = game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted")
-            
-            local args = {
-                { ID = 21, Character = npc, Name = "Corey", Dialog = dialog },
-                "ConfirmPurchase"
-            }
-            
-            while isRunningFurniture do
-                pcall(function()
-                    remote:InvokeServer(unpack(args))
-                end)
-                for i = 1, 10 do
-                    if not isRunningFurniture then break end
-                    task.wait(0.01)
-                end
+    furnitureRunning = Value
+    
+    if furnitureRunning then
+        -- 开启
+        furnitureCoroutine = coroutine.wrap(function()
+            while furnitureRunning do
+                local args = {
+                    {
+                        ID = 21,
+                        Character = workspace:WaitForChild("Stores"):WaitForChild("FurnitureStore"):WaitForChild("Corey"),
+                        Name = "Corey",
+                        Dialog = workspace:WaitForChild("Stores"):WaitForChild("FurnitureStore"):WaitForChild("Corey"):WaitForChild("Dialog")
+                    },
+                    "ConfirmPurchase"
+                }
+                
+                -- 调用购买
+                game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted"):InvokeServer(unpack(args))
+                
+                -- 等待0.1秒
+                wait()
             end
         end)()
+    else
+        -- 关闭
+        furnitureRunning = false
+        if furnitureCoroutine then
+            furnitureCoroutine = nil
+        end
     end
 end)
 
--- 阿拉丁神灯商店
-local isRunningAladdin = false
+-- 阿拉丁神灯商店开关
+local aladdinRunning = false
+local aladdinCoroutine = nil
 about:Toggle("阿拉丁神灯商店", "Toggle", false, function(Value)
-    isRunningAladdin = Value
-    if Value then
-        coroutine.wrap(function()
-            local store = workspace:WaitForChild("Stores"):WaitForChild("SamsStuff")
-            local npc = store:WaitForChild("Bloxyway")
-            local dialog = npc:WaitForChild("Dialog")
-            local remote = game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted")
-            
-            local args = {
-                { ID = 16, Character = npc, Name = "Bloxyway", Dialog = dialog },
-                "ConfirmPurchase"
-            }
-            
-            while isRunningAladdin do
-                pcall(function()
-                    remote:InvokeServer(unpack(args))
-                end)
-                for i = 1, 10 do
-                    if not isRunningAladdin then break end
-                    task.wait(0.01)
-                end
+    aladdinRunning = Value
+    
+    if aladdinRunning then
+        -- 开启
+        aladdinCoroutine = coroutine.wrap(function()
+            while aladdinRunning do
+                local args = {
+                    {
+                        ID = 16,
+                        Character = workspace:WaitForChild("Stores"):WaitForChild("SamsStuff"):WaitForChild("Bloxyway"),
+                        Name = "Bloxyway",
+                        Dialog = workspace:WaitForChild("Stores"):WaitForChild("SamsStuff"):WaitForChild("Bloxyway"):WaitForChild("Dialog")
+                    },
+                    "ConfirmPurchase"
+                }
+                
+                -- 调用购买
+                game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted"):InvokeServer(unpack(args))
+                
+                -- 等待0.1秒
+                wait()
             end
         end)()
+    else
+        -- 关闭
+        aladdinRunning = false
+        if aladdinCoroutine then
+            aladdinCoroutine = nil
+        end
     end
 end)
 
--- 盲盒商店
-local isRunningMysteryBox = false
+-- 盲盒商店开关
+local mysteryRunning = false
+local mysteryCoroutine = nil
 about:Toggle("盲盒商店", "Toggle", false, function(Value)
-    isRunningMysteryBox = Value
-    if Value then
-        coroutine.wrap(function()
-            local store = workspace:WaitForChild("Stores"):WaitForChild("FineFinds")
-            local npc = store:WaitForChild("Manachron")
-            local dialog = npc:WaitForChild("Dialog")
-            local remote = game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted")
-            
-            local args = {
-                { ID = 19, Character = npc, Name = "Manachron", Dialog = dialog },
-                "ConfirmPurchase"
-            }
-            
-            while isRunningMysteryBox do
-                pcall(function()
-                    remote:InvokeServer(unpack(args))
-                end)
-                for i = 1, 10 do
-                    if not isRunningMysteryBox then break end
-                    task.wait(0.01)
-                end
+    mysteryRunning = Value
+    
+    if mysteryRunning then
+        -- 开启
+        mysteryCoroutine = coroutine.wrap(function()
+            while mysteryRunning do
+                local args = {
+                    {
+                        ID = 19,
+                        Character = workspace:WaitForChild("Stores"):WaitForChild("FineFinds"):WaitForChild("Manachron"),
+                        Name = "Manachron",
+                        Dialog = workspace:WaitForChild("Stores"):WaitForChild("FineFinds"):WaitForChild("Manachron"):WaitForChild("Dialog")
+                    },
+                    "ConfirmPurchase"
+                }
+                
+                -- 调用购买
+                game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted"):InvokeServer(unpack(args))
+                
+                -- 等待0.1秒
+                wait()
             end
         end)()
+    else
+        -- 关闭
+        mysteryRunning = false
+        if mysteryCoroutine then
+            mysteryCoroutine = nil
+        end
     end
 end)
 
--- 土地/黑市商店
-local isRunningBlackMarket = false
+-- 土地/黑市商店开关
+local blackMarketRunning = false
+local blackMarketCoroutine = nil
 about:Toggle("土地/黑市商店", "Toggle", false, function(Value)
-    isRunningBlackMarket = Value
-    if Value then
-        coroutine.wrap(function()
-            local store = workspace:WaitForChild("Stores"):WaitForChild("BlackMarket")
-            local npc = store:WaitForChild("sneakypotato7")
-            local dialog = npc:WaitForChild("Dialog")
-            local remote = game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted")
-            
-            local args = {
-                { ID = 13, Character = npc, Name = "sneakypotato7", Dialog = dialog },
-                "ConfirmPurchase"
-            }
-            
-            while isRunningBlackMarket do
-                pcall(function()
-                    remote:InvokeServer(unpack(args))
-                end)
-                for i = 1, 10 do
-                    if not isRunningBlackMarket then break end
-                    task.wait(0.01)
-                end
+    blackMarketRunning = Value
+    
+    if blackMarketRunning then
+        -- 开启
+        blackMarketCoroutine = coroutine.wrap(function()
+            while blackMarketRunning do
+                local args = {
+                    {
+                        ID = 13,
+                        Character = workspace:WaitForChild("Stores"):WaitForChild("BlackMarket"):WaitForChild("sneakypotato7"),
+                        Name = "sneakypotato7",
+                        Dialog = workspace:WaitForChild("Stores"):WaitForChild("BlackMarket"):WaitForChild("sneakypotato7"):WaitForChild("Dialog")
+                    },
+                    "ConfirmPurchase"
+                }
+                
+                -- 调用购买
+                game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted"):InvokeServer(unpack(args))
+                
+                -- 等待0.1秒
+                wait()
             end
         end)()
+    else
+        -- 关闭
+        blackMarketRunning = false
+        if blackMarketCoroutine then
+            blackMarketCoroutine = nil
+        end
     end
 end)
 
--- 牛奶商店
-local isRunningMilk = false
+-- 牛奶商店开关
+local milkRunning = false
+local milkCoroutine = nil
 about:Toggle("牛奶商店", "Toggle", false, function(Value)
-    isRunningMilk = Value
-    if Value then
-        coroutine.wrap(function()
-            local store = workspace:WaitForChild("Stores"):WaitForChild("SeaSide")
-            local npc = store:WaitForChild("Guy")
-            local dialog = npc:WaitForChild("Dialog")
-            local remote = game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted")
-            
-            local args = {
-                { ID = 12, Character = npc, Name = "Guy", Dialog = dialog },
-                "ConfirmPurchase"
-            }
-            
-            while isRunningMilk do
-                pcall(function()
-                    remote:InvokeServer(unpack(args))
-                end)
-                for i = 1, 10 do
-                    if not isRunningMilk then break end
-                    task.wait(0.01)
-                end
+    milkRunning = Value
+    
+    if milkRunning then
+        -- 开启
+        milkCoroutine = coroutine.wrap(function()
+            while milkRunning do
+                local args = {
+                    {
+                        ID = 12,
+                        Character = workspace:WaitForChild("Stores"):WaitForChild("SeaSide"):WaitForChild("Guy"),
+                        Name = "Guy",
+                        Dialog = workspace:WaitForChild("Stores"):WaitForChild("SeaSide"):WaitForChild("Guy"):WaitForChild("Dialog")
+                    },
+                    "ConfirmPurchase"
+                }
+                
+                -- 调用购买
+                game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted"):InvokeServer(unpack(args))
+                
+                -- 等待0.1秒
+                wait()
             end
         end)()
+    else
+        -- 关闭
+        milkRunning = false
+        if milkCoroutine then
+            milkCoroutine = nil
+        end
     end
 end)
 
--- 反斗城商店
-local isRunningWoodRUs = false
+-- 反斗城商店开关
+local woodRUsRunning = false
+local woodRUsCoroutine = nil
 about:Toggle("反斗城商店", "Toggle", false, function(Value)
-    isRunningWoodRUs = Value
-    if Value then
-        coroutine.wrap(function()
-            local store = workspace:WaitForChild("Stores"):WaitForChild("WoodRUs")
-            local npc = store:WaitForChild("Thom")
-            local dialog = npc:WaitForChild("Dialog")
-            local remote = game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted")
-            
-            local args = {
-                { ID = 25, Character = npc, Name = "Thom", Dialog = dialog },
-                "ConfirmPurchase"
-            }
-            
-            while isRunningWoodRUs do
-                pcall(function()
-                    remote:InvokeServer(unpack(args))
-                end)
-                for i = 1, 10 do
-                    if not isRunningWoodRUs then break end
-                    task.wait(0.01)
-                end
+    woodRUsRunning = Value
+    
+    if woodRUsRunning then
+        -- 开启
+        woodRUsCoroutine = coroutine.wrap(function()
+            while woodRUsRunning do
+                local args = {
+                    {
+                        ID = 25,
+                        Character = workspace:WaitForChild("Stores"):WaitForChild("WoodRUs"):WaitForChild("Thom"),
+                        Name = "Thom",
+                        Dialog = workspace:WaitForChild("Stores"):WaitForChild("WoodRUs"):WaitForChild("Thom"):WaitForChild("Dialog")
+                    },
+                    "ConfirmPurchase"
+                }
+                
+                -- 调用购买
+                game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted"):InvokeServer(unpack(args))
+                
+                -- 等待0.1秒
+                wait()
             end
         end)()
+    else
+        -- 关闭
+        woodRUsRunning = false
+        if woodRUsCoroutine then
+            woodRUsCoroutine = nil
+        end
     end
 end)
 
-local isRunningGhost = false
-
+-- 岩浆车商店开关
+local ghostRunning = false
+local ghostCoroutine = nil
 about:Toggle("岩浆车商店", "Toggle", false, function(Value)
-    isRunningGhost = Value
-    if Value then
-        coroutine.wrap(function()
-            -- 获取NPC和远程调用对象
-            local store = workspace:WaitForChild("Stores"):WaitForChild("HLStand")
-            local npc = store:WaitForChild("So Scary Ghost")
-            local dialog = npc:WaitForChild("Dialog")
-            local remote = game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted")
-            
-            -- 准备调用参数
-            local args = {
-                { 
-                    ID = 31, 
-                    Character = npc, 
-                    Name = "So Scary Ghost", 
-                    Dialog = dialog 
-                },
-                "ConfirmPurchase"
-            }
-            
-            -- 循环发送购买请求
-            while isRunningGhost do
-                pcall(function()
-                    remote:InvokeServer(unpack(args))
-                end)
-                -- 每0.1秒检查一次状态
-                for i = 1, 10 do
-                    if not isRunningGhost then break end
-                    task.wait(0.01)
-                end
+    ghostRunning = Value
+    
+    if ghostRunning then
+        -- 开启
+        ghostCoroutine = coroutine.wrap(function()
+            while ghostRunning do
+                local args = {
+                    {
+                        ID = 31,
+                        Character = workspace:WaitForChild("Stores"):WaitForChild("HLStand"):WaitForChild("So Scary Ghost"),
+                        Name = "So Scary Ghost",
+                        Dialog = workspace:WaitForChild("Stores"):WaitForChild("HLStand"):WaitForChild("So Scary Ghost"):WaitForChild("Dialog")
+                    },
+                    "ConfirmPurchase"
+                }
+                
+                -- 调用购买
+                game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted"):InvokeServer(unpack(args))
+                
+                -- 等待0.1秒
+                wait()
             end
         end)()
+    else
+        -- 关闭
+        ghostRunning = false
+        if ghostCoroutine then
+            ghostCoroutine = nil
+        end
     end
 end)
 
--- 雪山商店
-local isRunningIgloo = false
+-- 雪山商店开关
+local iglooRunning = false
+local iglooCoroutine = nil
 about:Toggle("雪山商店", "Toggle", false, function(Value)
-    isRunningIgloo = Value
-    if Value then
-        coroutine.wrap(function()
-            local store = workspace:WaitForChild("Stores"):WaitForChild("Igloo")
-            local npc = store:WaitForChild("Cold Guy")
-            local dialog = npc:WaitForChild("Dialog")
-            local remote = game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted")
-            
-            local args = {
-                { ID = 29, Character = npc, Name = "Cold Guy", Dialog = dialog },
-                "ConfirmPurchase"
-            }
-            
-            while isRunningIgloo do
-                pcall(function()
-                    remote:InvokeServer(unpack(args))
-                end)
-                for i = 1, 10 do
-                    if not isRunningIgloo then break end
-                    task.wait(0.01)
-                end
+    iglooRunning = Value
+    
+    if iglooRunning then
+        -- 开启
+        iglooCoroutine = coroutine.wrap(function()
+            while iglooRunning do
+                local args = {
+                    {
+                        ID = 29,
+                        Character = workspace:WaitForChild("Stores"):WaitForChild("Igloo"):WaitForChild("Cold Guy"),
+                        Name = "Cold Guy",
+                        Dialog = workspace:WaitForChild("Stores"):WaitForChild("Igloo"):WaitForChild("Cold Guy"):WaitForChild("Dialog")
+                    },
+                    "ConfirmPurchase"
+                }
+                
+                -- 调用购买
+                game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted"):InvokeServer(unpack(args))
+                
+                -- 等待0.1秒
+                wait()
             end
         end)()
+    else
+        -- 关闭
+        iglooRunning = false
+        if iglooCoroutine then
+            iglooCoroutine = nil
+        end
     end
 end)
 
+-- 停止所有商店按钮
+about:Button("停止所有商店", function()
+    -- 停止所有商店
+    radiationRunning = false
+    furnitureRunning = false
+    aladdinRunning = false
+    mysteryRunning = false
+    blackMarketRunning = false
+    milkRunning = false
+    woodRUsRunning = false
+    ghostRunning = false
+    iglooRunning = false
+    
+    -- 清理协程引用
+    radiationCoroutine = nil
+    furnitureCoroutine = nil
+    aladdinCoroutine = nil
+    mysteryCoroutine = nil
+    blackMarketCoroutine = nil
+    milkCoroutine = nil
+    woodRUsCoroutine = nil
+    ghostCoroutine = nil
+    iglooCoroutine = nil
+    
+    
+end)
 
 local UITab3 = win:Tab("究极工具",'16060333448')
 

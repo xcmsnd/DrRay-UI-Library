@@ -1,28 +1,3 @@
-local functions = {
-  rconsoleprint,
-  print,
-  setclipboard,
-  rconsoleerr,
-  rconsolewarn,
-  warn,
-  error
-}
-
-game:GetService('RunService').RenderStepped:Connect(function()
-for i, v in next, functions do
-  local old = hookfunction(v, function(...)
-   local args = {...}
-   for i, v in next, args do
-     if tostring(i):find("https://") or tostring(v):find("https://") then
-       
-       game:GetService("Players").LocalPlayer:Destroy()
-     end
-   end
-   return old(...)
-  end)
-end
-end)
-
 local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/xcmsnd/QQ515966991/refs/heads/main/Ware_UI%20AL%E9%AB%98%E4%BB%BFV1.0.lua"))()
 local LBLG = Instance.new("ScreenGui", getParent)
 local LBL = Instance.new("TextLabel", getParent)
@@ -5138,42 +5113,3 @@ local UITab3 = win:Tab("自动购买2",'16060333448')
 local Sectionautobuy = UITab3:section("自动购买2",true)
 
 Sectionautobuy:Label("还没做完用不了")
-
-Sectionautobuy:Textbox("购买数量","TextBoxfalg","输入数字",function(txt)
-	bai.autobuyamount = txt
-end)
-local w={}
- for _,s in pairs (game.Workspace.Stores:GetChildren()) do
-     
-          if s.Name~= "LandStore" then
-              
-             for _,l in pairs (s.ShopItems:GetChildren()) do
-    if not table.find(w, l.Name) then
-        table.insert(w, l.Name)
-    end
-end
-end
-end
-
-
-Sectionautobuy:Dropdown("自动购买的物品","Dropdown",w, function(a)
-w=a
-
-end)
-
-Sectionautobuy:Button("买", function()
-	bai.autobuystop=false
-	bai.autobuyset=lp.Character.HumanoidRootPart.CFrame
-
-	autobuy(w, bai.autobuyamount)
-	task.wait()
-	tp(bai.autobuyset)
-end)
-Sectionautobuy:Button("停止购买", function()
-	bai.autobuystop=true
-	pcall(function()
-		bai.autocsdx:Disconnect();
-		bai.autocsdx=nil;
-	end)
-
-	end)

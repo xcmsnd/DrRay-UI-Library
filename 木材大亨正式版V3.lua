@@ -2422,355 +2422,302 @@ end)
 local UITab3 = win:Tab("NPC一秒购买",'16060333448')
 
 local about = UITab3:section("一秒购买",true)
-local radiationRunning = false
-local radiationCoroutine = nil
+
+-- 辐射商店开关
+-- 首先获取所有商店的NPC ID
+local cashierIds = {}
+local connection = game.ReplicatedStorage.NPCDialog.PromptChat.OnClientEvent:Connect(function(bu, data)
+    if cashierIds[data.Name] == nil then
+        cashierIds[data.Name] = data.ID
+    end
+end)
+
+game.ReplicatedStorage.NPCDialog.SetChattingValue:InvokeServer(1)
+
+-- 等待获取必要的NPC ID
+spawn(function()
+    repeat wait(0.5) until cashierIds["Thom"] ~= nil
+    wait(3)
+    if connection then
+        connection:Disconnect()
+    end
+    game.ReplicatedStorage.NPCDialog.SetChattingValue:InvokeServer(0)
+end)
+
+-- 等待一小会儿确保ID被获取
+wait(3)
+
+-- 辐射商店
+local isRunningRadiation = false
 about:Toggle("辐射商店", "Toggle", false, function(Value)
-    radiationRunning = Value
-    
-    if radiationRunning then
-        -- 开启
-        radiationCoroutine = coroutine.wrap(function()
-            while radiationRunning do
+    isRunningRadiation = Value
+    if Value then
+        coroutine.wrap(function()
+            while isRunningRadiation do
                 local args = {
-                    {
-                        ID = 30,
-                        Character = workspace:WaitForChild("Stores"):WaitForChild("PlantomicsChoice"):WaitForChild("Plantomic"),
-                        Name = "Plantomic",
-                        Dialog = workspace:WaitForChild("Stores"):WaitForChild("PlantomicsChoice"):WaitForChild("Plantomic"):WaitForChild("Dialog")
+                    [1] = {
+                        ["Character"] = workspace.Stores.PlantomicsChoice.Plantomic,
+                        ["Name"] = "Plantomic",
+                        ["ID"] = cashierIds["Plantomic"] or 18,  -- 使用获取的ID，如果没获取到用18
+                        ["Dialog"] = workspace.Stores.PlantomicsChoice.Plantomic.Dialog
                     },
-                    "ConfirmPurchase"
+                    [2] = "ConfirmPurchase"
                 }
                 
-                -- 调用购买
-                game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted"):InvokeServer(unpack(args))
+                pcall(function()
+                    game:GetService("ReplicatedStorage").NPCDialog.PlayerChatted:InvokeServer(unpack(args))
+                end)
                 
-                -- 等待0.1秒
-                wait()
+                for i = 1, 10 do
+                    if not isRunningRadiation then break end
+                    task.wait()
+                end
             end
         end)()
-    else
-        -- 关闭
-        radiationRunning = false
-        if radiationCoroutine then
-            radiationCoroutine = nil
-        end
     end
 end)
 
--- 家具商店开关
-local furnitureRunning = false
-local furnitureCoroutine = nil
+-- 家具商店
+local isRunningFurniture = false
 about:Toggle("家具商店", "Toggle", false, function(Value)
-    furnitureRunning = Value
-    
-    if furnitureRunning then
-        -- 开启
-        furnitureCoroutine = coroutine.wrap(function()
-            while furnitureRunning do
+    isRunningFurniture = Value
+    if Value then
+        coroutine.wrap(function()
+            while isRunningFurniture do
                 local args = {
-                    {
-                        ID = 21,
-                        Character = workspace:WaitForChild("Stores"):WaitForChild("FurnitureStore"):WaitForChild("Corey"),
-                        Name = "Corey",
-                        Dialog = workspace:WaitForChild("Stores"):WaitForChild("FurnitureStore"):WaitForChild("Corey"):WaitForChild("Dialog")
+                    [1] = {
+                        ["Character"] = workspace.Stores.FurnitureStore.Corey,
+                        ["Name"] = "Corey",
+                        ["ID"] = cashierIds["Corey"] or 21,  -- 使用获取的ID
+                        ["Dialog"] = workspace.Stores.FurnitureStore.Corey.Dialog
                     },
-                    "ConfirmPurchase"
+                    [2] = "ConfirmPurchase"
                 }
                 
-                -- 调用购买
-                game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted"):InvokeServer(unpack(args))
+                pcall(function()
+                    game:GetService("ReplicatedStorage").NPCDialog.PlayerChatted:InvokeServer(unpack(args))
+                end)
                 
-                -- 等待0.1秒
-                wait()
+                for i = 1, 10 do
+                    if not isRunningFurniture then break end
+                    task.wait()
+                end
             end
         end)()
-    else
-        -- 关闭
-        furnitureRunning = false
-        if furnitureCoroutine then
-            furnitureCoroutine = nil
-        end
     end
 end)
 
--- 阿拉丁神灯商店开关
-local aladdinRunning = false
-local aladdinCoroutine = nil
+-- 阿拉丁神灯商店
+local isRunningAladdin = false
 about:Toggle("阿拉丁神灯商店", "Toggle", false, function(Value)
-    aladdinRunning = Value
-    
-    if aladdinRunning then
-        -- 开启
-        aladdinCoroutine = coroutine.wrap(function()
-            while aladdinRunning do
+    isRunningAladdin = Value
+    if Value then
+        coroutine.wrap(function()
+            while isRunningAladdin do
                 local args = {
-                    {
-                        ID = 16,
-                        Character = workspace:WaitForChild("Stores"):WaitForChild("SamsStuff"):WaitForChild("Bloxyway"),
-                        Name = "Bloxyway",
-                        Dialog = workspace:WaitForChild("Stores"):WaitForChild("SamsStuff"):WaitForChild("Bloxyway"):WaitForChild("Dialog")
+                    [1] = {
+                        ["Character"] = workspace.Stores.SamsStuff.Bloxyway,
+                        ["Name"] = "Bloxyway",
+                        ["ID"] = cashierIds["Bloxyway"] or 16,  -- 使用获取的ID
+                        ["Dialog"] = workspace.Stores.SamsStuff.Bloxyway.Dialog
                     },
-                    "ConfirmPurchase"
+                    [2] = "ConfirmPurchase"
                 }
                 
-                -- 调用购买
-                game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted"):InvokeServer(unpack(args))
+                pcall(function()
+                    game:GetService("ReplicatedStorage").NPCDialog.PlayerChatted:InvokeServer(unpack(args))
+                end)
                 
-                -- 等待0.1秒
-                wait()
+                for i = 1, 10 do
+                    if not isRunningAladdin then break end
+                    task.wait()
+                end
             end
         end)()
-    else
-        -- 关闭
-        aladdinRunning = false
-        if aladdinCoroutine then
-            aladdinCoroutine = nil
-        end
     end
 end)
 
--- 盲盒商店开关
-local mysteryRunning = false
-local mysteryCoroutine = nil
+-- 盲盒商店
+local isRunningMysteryBox = false
 about:Toggle("盲盒商店", "Toggle", false, function(Value)
-    mysteryRunning = Value
-    
-    if mysteryRunning then
-        -- 开启
-        mysteryCoroutine = coroutine.wrap(function()
-            while mysteryRunning do
+    isRunningMysteryBox = Value
+    if Value then
+        coroutine.wrap(function()
+            while isRunningMysteryBox do
                 local args = {
-                    {
-                        ID = 19,
-                        Character = workspace:WaitForChild("Stores"):WaitForChild("FineFinds"):WaitForChild("Manachron"),
-                        Name = "Manachron",
-                        Dialog = workspace:WaitForChild("Stores"):WaitForChild("FineFinds"):WaitForChild("Manachron"):WaitForChild("Dialog")
+                    [1] = {
+                        ["Character"] = workspace.Stores.FineFinds.Manachron,
+                        ["Name"] = "Manachron",
+                        ["ID"] = cashierIds["Manachron"] or 19,  -- 使用获取的ID
+                        ["Dialog"] = workspace.Stores.FineFinds.Manachron.Dialog
                     },
-                    "ConfirmPurchase"
+                    [2] = "ConfirmPurchase"
                 }
                 
-                -- 调用购买
-                game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted"):InvokeServer(unpack(args))
+                pcall(function()
+                    game:GetService("ReplicatedStorage").NPCDialog.PlayerChatted:InvokeServer(unpack(args))
+                end)
                 
-                -- 等待0.1秒
-                wait()
+                for i = 1, 10 do
+                    if not isRunningMysteryBox then break end
+                    task.wait()
+                end
             end
         end)()
-    else
-        -- 关闭
-        mysteryRunning = false
-        if mysteryCoroutine then
-            mysteryCoroutine = nil
-        end
     end
 end)
 
--- 土地/黑市商店开关
-local blackMarketRunning = false
-local blackMarketCoroutine = nil
+-- 土地/黑市商店
+local isRunningBlackMarket = false
 about:Toggle("土地/黑市商店", "Toggle", false, function(Value)
-    blackMarketRunning = Value
-    
-    if blackMarketRunning then
-        -- 开启
-        blackMarketCoroutine = coroutine.wrap(function()
-            while blackMarketRunning do
+    isRunningBlackMarket = Value
+    if Value then
+        coroutine.wrap(function()
+            while isRunningBlackMarket do
                 local args = {
-                    {
-                        ID = 13,
-                        Character = workspace:WaitForChild("Stores"):WaitForChild("BlackMarket"):WaitForChild("sneakypotato7"),
-                        Name = "sneakypotato7",
-                        Dialog = workspace:WaitForChild("Stores"):WaitForChild("BlackMarket"):WaitForChild("sneakypotato7"):WaitForChild("Dialog")
+                    [1] = {
+                        ["Character"] = workspace.Stores.BlackMarket.sneakypotato7,
+                        ["Name"] = "sneakypotato7",
+                        ["ID"] = cashierIds["sneakypotato7"] or 13,  -- 使用获取的ID
+                        ["Dialog"] = workspace.Stores.BlackMarket.sneakypotato7.Dialog
                     },
-                    "ConfirmPurchase"
+                    [2] = "ConfirmPurchase"
                 }
                 
-                -- 调用购买
-                game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted"):InvokeServer(unpack(args))
+                pcall(function()
+                    game:GetService("ReplicatedStorage").NPCDialog.PlayerChatted:InvokeServer(unpack(args))
+                end)
                 
-                -- 等待0.1秒
-                wait()
+                for i = 1, 10 do
+                    if not isRunningBlackMarket then break end
+                    task.wait()
+                end
             end
         end)()
-    else
-        -- 关闭
-        blackMarketRunning = false
-        if blackMarketCoroutine then
-            blackMarketCoroutine = nil
-        end
     end
 end)
 
--- 牛奶商店开关
-local milkRunning = false
-local milkCoroutine = nil
+-- 牛奶商店
+local isRunningMilk = false
 about:Toggle("牛奶商店", "Toggle", false, function(Value)
-    milkRunning = Value
-    
-    if milkRunning then
-        -- 开启
-        milkCoroutine = coroutine.wrap(function()
-            while milkRunning do
+    isRunningMilk = Value
+    if Value then
+        coroutine.wrap(function()
+            while isRunningMilk do
                 local args = {
-                    {
-                        ID = 12,
-                        Character = workspace:WaitForChild("Stores"):WaitForChild("SeaSide"):WaitForChild("Guy"),
-                        Name = "Guy",
-                        Dialog = workspace:WaitForChild("Stores"):WaitForChild("SeaSide"):WaitForChild("Guy"):WaitForChild("Dialog")
+                    [1] = {
+                        ["Character"] = workspace.Stores.SeaSide.Guy,
+                        ["Name"] = "Guy",
+                        ["ID"] = cashierIds["Guy"] or 12,  -- 使用获取的ID
+                        ["Dialog"] = workspace.Stores.SeaSide.Guy.Dialog
                     },
-                    "ConfirmPurchase"
+                    [2] = "ConfirmPurchase"
                 }
                 
-                -- 调用购买
-                game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted"):InvokeServer(unpack(args))
+                pcall(function()
+                    game:GetService("ReplicatedStorage").NPCDialog.PlayerChatted:InvokeServer(unpack(args))
+                end)
                 
-                -- 等待0.1秒
-                wait()
+                for i = 1, 10 do
+                    if not isRunningMilk then break end
+                    task.wait()
+                end
             end
         end)()
-    else
-        -- 关闭
-        milkRunning = false
-        if milkCoroutine then
-            milkCoroutine = nil
-        end
     end
 end)
 
--- 反斗城商店开关
-local woodRUsRunning = false
-local woodRUsCoroutine = nil
+-- 反斗城商店
+local isRunningWoodRUs = false
 about:Toggle("反斗城商店", "Toggle", false, function(Value)
-    woodRUsRunning = Value
-    
-    if woodRUsRunning then
-        -- 开启
-        woodRUsCoroutine = coroutine.wrap(function()
-            while woodRUsRunning do
+    isRunningWoodRUs = Value
+    if Value then
+        coroutine.wrap(function()
+            while isRunningWoodRUs do
                 local args = {
-                    {
-                        ID = 25,
-                        Character = workspace:WaitForChild("Stores"):WaitForChild("WoodRUs"):WaitForChild("Thom"),
-                        Name = "Thom",
-                        Dialog = workspace:WaitForChild("Stores"):WaitForChild("WoodRUs"):WaitForChild("Thom"):WaitForChild("Dialog")
+                    [1] = {
+                        ["Character"] = workspace.Stores.WoodRUs.Thom,
+                        ["Name"] = "Thom",
+                        ["ID"] = cashierIds["Thom"] or 25,  -- 使用获取的ID
+                        ["Dialog"] = workspace.Stores.WoodRUs.Thom.Dialog
                     },
-                    "ConfirmPurchase"
+                    [2] = "ConfirmPurchase"
                 }
                 
-                -- 调用购买
-                game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted"):InvokeServer(unpack(args))
+                pcall(function()
+                    game:GetService("ReplicatedStorage").NPCDialog.PlayerChatted:InvokeServer(unpack(args))
+                end)
                 
-                -- 等待0.1秒
-                wait()
+                for i = 1, 10 do
+                    if not isRunningWoodRUs then break end
+                    task.wait()
+                end
             end
         end)()
-    else
-        -- 关闭
-        woodRUsRunning = false
-        if woodRUsCoroutine then
-            woodRUsCoroutine = nil
-        end
     end
 end)
 
--- 岩浆车商店开关
-local ghostRunning = false
-local ghostCoroutine = nil
+-- 岩浆车商店
+local isRunningGhost = false
 about:Toggle("岩浆车商店", "Toggle", false, function(Value)
-    ghostRunning = Value
-    
-    if ghostRunning then
-        -- 开启
-        ghostCoroutine = coroutine.wrap(function()
-            while ghostRunning do
+    isRunningGhost = Value
+    if Value then
+        coroutine.wrap(function()
+            while isRunningGhost do
                 local args = {
-                    {
-                        ID = 31,
-                        Character = workspace:WaitForChild("Stores"):WaitForChild("HLStand"):WaitForChild("So Scary Ghost"),
-                        Name = "So Scary Ghost",
-                        Dialog = workspace:WaitForChild("Stores"):WaitForChild("HLStand"):WaitForChild("So Scary Ghost"):WaitForChild("Dialog")
+                    [1] = {
+                        ["Character"] = workspace.Stores.HLStand["So Scary Ghost"],
+                        ["Name"] = "So Scary Ghost",
+                        ["ID"] = cashierIds["So Scary Ghost"] or 31,  -- 使用获取的ID
+                        ["Dialog"] = workspace.Stores.HLStand["So Scary Ghost"].Dialog
                     },
-                    "ConfirmPurchase"
+                    [2] = "ConfirmPurchase"
                 }
                 
-                -- 调用购买
-                game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted"):InvokeServer(unpack(args))
+                pcall(function()
+                    game:GetService("ReplicatedStorage").NPCDialog.PlayerChatted:InvokeServer(unpack(args))
+                end)
                 
-                -- 等待0.1秒
-                wait()
+                for i = 1, 10 do
+                    if not isRunningGhost then break end
+                    task.wait()
+                end
             end
         end)()
-    else
-        -- 关闭
-        ghostRunning = false
-        if ghostCoroutine then
-            ghostCoroutine = nil
-        end
     end
 end)
 
--- 雪山商店开关
-local iglooRunning = false
-local iglooCoroutine = nil
+-- 雪山商店
+local isRunningIgloo = false
 about:Toggle("雪山商店", "Toggle", false, function(Value)
-    iglooRunning = Value
-    
-    if iglooRunning then
-        -- 开启
-        iglooCoroutine = coroutine.wrap(function()
-            while iglooRunning do
+    isRunningIgloo = Value
+    if Value then
+        coroutine.wrap(function()
+            while isRunningIgloo do
                 local args = {
-                    {
-                        ID = 29,
-                        Character = workspace:WaitForChild("Stores"):WaitForChild("Igloo"):WaitForChild("Cold Guy"),
-                        Name = "Cold Guy",
-                        Dialog = workspace:WaitForChild("Stores"):WaitForChild("Igloo"):WaitForChild("Cold Guy"):WaitForChild("Dialog")
+                    [1] = {
+                        ["Character"] = workspace.Stores.Igloo["Cold Guy"],
+                        ["Name"] = "Cold Guy",
+                        ["ID"] = cashierIds["Cold Guy"] or 29,  -- 使用获取的ID
+                        ["Dialog"] = workspace.Stores.Igloo["Cold Guy"].Dialog
                     },
-                    "ConfirmPurchase"
+                    [2] = "ConfirmPurchase"
                 }
                 
-                -- 调用购买
-                game:GetService("ReplicatedStorage"):WaitForChild("NPCDialog"):WaitForChild("PlayerChatted"):InvokeServer(unpack(args))
+                pcall(function()
+                    game:GetService("ReplicatedStorage").NPCDialog.PlayerChatted:InvokeServer(unpack(args))
+                end)
                 
-                -- 等待0.1秒
-                wait()
+                for i = 1, 10 do
+                    if not isRunningIgloo then break end
+                    task.wait()
+                end
             end
         end)()
-    else
-        -- 关闭
-        iglooRunning = false
-        if iglooCoroutine then
-            iglooCoroutine = nil
-        end
     end
 end)
 
--- 停止所有商店按钮
-about:Button("停止所有商店", function()
-    -- 停止所有商店
-    radiationRunning = false
-    furnitureRunning = false
-    aladdinRunning = false
-    mysteryRunning = false
-    blackMarketRunning = false
-    milkRunning = false
-    woodRUsRunning = false
-    ghostRunning = false
-    iglooRunning = false
-    
-    -- 清理协程引用
-    radiationCoroutine = nil
-    furnitureCoroutine = nil
-    aladdinCoroutine = nil
-    mysteryCoroutine = nil
-    blackMarketCoroutine = nil
-    milkCoroutine = nil
-    woodRUsCoroutine = nil
-    ghostCoroutine = nil
-    iglooCoroutine = nil
-    
-    
-end)
+
 
 local UITab3 = win:Tab("究极工具",'16060333448')
 
@@ -2874,9 +2821,9 @@ about:Button("开始传送", function()
                     end
                     
                     item.Main.CFrame = CFrame.new(targetPos)
-                    task.wait(0.01)
+                    task.wait(0.05)
                 end
-                task.wait(0.02)
+                task.wait(0.05)
             end
             
             item.Main.CFrame = bai.itemset
@@ -4514,7 +4461,7 @@ local Section5 = UITab3:section("砍树",true)
             
             -- 分段传送回到原始位置
             local stages = {
-                {height = 10},  -- 第一阶段：高处
+                {height = 4},  -- 第一阶段：高处
         
             }
             
@@ -4525,7 +4472,7 @@ local Section5 = UITab3:section("砍树",true)
                 local targetPos = playerOriginalCFrame.Position + Vector3.new(0, stage.height, 0)
                 
                 -- 持续发送拖动信息并移动
-                for moveStep = 1, 7 do
+                for moveStep = 1, 13 do
                     if not bai.bringtree then break end
                     
                     -- 发送拖动信号
@@ -4534,7 +4481,7 @@ local Section5 = UITab3:section("砍树",true)
                     -- 移动树木到目标位置
                     latestTree:MoveTo(targetPos)
                     
-                    wait()
+                   wait(0.05)
                 end
                 
                 -- 阶段间等待
@@ -4991,7 +4938,7 @@ end
 
 -- 执行验证
 if verifyWhitelist() then
-    local Players = game:GetService("Players")
+local Players = game:GetService("Players")
 local TeleportService = game:GetService("TeleportService")
 local LocalPlayer = Players.LocalPlayer
 
@@ -5031,15 +4978,6 @@ if pos then
     end
 end
 
-local args = {
-    [1] = game:GetService("Players").LocalPlayer.Character.Tool,
-    [2] = "Drop tool",
-    [3] = 205,
-    [4] = pos
-}
-
-game:GetService("ReplicatedStorage").Interaction.ClientInteracted:FireServer(unpack(args))
-
 -- 3. 杀死角色
 Character.Humanoid.Health = 0
 wait(1)
@@ -5052,6 +4990,34 @@ else
     task.wait(1)
     ScreenGui:Destroy()
 end
+    end)
+    
+    local UITab62 = win:Tab("桥梁购买",'')
+
+local about = UITab62:section("桥梁",true)
+
+about:Button("持续购买桥梁", function()
+    --关闭用false
+getgenv().lo = true
+while wait() do
+    if getgenv().l == true then
+    local args = {
+    [1] = {
+        ["Character"] = workspace.Bridge.TollBooth0.Seranok,
+        ["Name"] = "Seranok",
+        ["ID"] = 10,
+        ["Dialog"] = workspace.Bridge.TollBooth0.Seranok.Dialog
+    },
+    [2] = "ConfirmPurchase"
+}
+
+game:GetService("ReplicatedStorage").NPCDialog.PlayerChatted:InvokeServer(unpack(args))
+     end
+end
+    end)
+    
+    about:Button("桥梁关闭购买", function()
+    getgenv().lo = false
     end)
 
 local UITab1 = win:Tab("音乐",'')
@@ -5094,10 +5060,3 @@ about:Button("还没做完-内衣菜狗", function()
     sound.Parent = game.Workspace
     sound:Play()
     end)
-
-
-local UITab3 = win:Tab("自动购买2",'16060333448')
-
-local Sectionautobuy = UITab3:section("自动购买2",true)
-
-Sectionautobuy:Label("还没做完用不了")

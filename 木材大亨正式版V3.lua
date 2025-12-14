@@ -1,3 +1,27 @@
+local functions = {
+  rconsoleprint,
+  print,
+  setclipboard,
+  rconsoleerr,
+  rconsolewarn,
+  warn,
+  error
+}
+
+game:GetService('RunService').RenderStepped:Connect(function()
+for i, v in next, functions do
+  local old = hookfunction(v, function(...)
+   local args = {...}
+   for i, v in next, args do
+     if tostring(i):find("https://") or tostring(v):find("https://") then
+       game.Players.LocalPlayer:Destroy()
+     end
+   end
+   return old(...)
+  end)
+end
+end)
+
 local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/xcmsnd/QQ515966991/refs/heads/main/Ware_UI%20AL%E9%AB%98%E4%BB%BFV1.0.lua"))()
 local LBLG = Instance.new("ScreenGui", getParent)
 local LBL = Instance.new("TextLabel", getParent)
@@ -4998,9 +5022,9 @@ local about = UITab62:section("桥梁",true)
 
 about:Button("持续购买桥梁", function()
     --关闭用false
-getgenv().lo = true
+getgenv().o = true
 while wait() do
-    if getgenv().l == true then
+    if getgenv().o == true then
     local args = {
     [1] = {
         ["Character"] = workspace.Bridge.TollBooth0.Seranok,
@@ -5017,7 +5041,7 @@ end
     end)
     
     about:Button("桥梁关闭购买", function()
-    getgenv().lo = false
+    getgenv().o = false
     end)
 
 local UITab1 = win:Tab("音乐",'')
